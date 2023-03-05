@@ -8,7 +8,6 @@ public class ForwardAction extends AbstractInputAction
 { 
     private MyGame game;
     private GameObject av;
-    private Camera c;
 
     public ForwardAction(MyGame g) 
     { 
@@ -18,11 +17,8 @@ public class ForwardAction extends AbstractInputAction
     @Override 
     public void performAction(float time, Event e) 
     {
-        
         av = game.getAvatar();
-        c = game.getCamera();
-        if(game.getDolphinView()) av.objMoveForward(e, game.getElapsedTime() + (game.getElapsedTime()*game.getChoco()));
-        else if(!game.getDolphinView()) c.camMoveForward(e, game.getElapsedTime() + (game.getElapsedTime()*game.getChoco()));
+        av.objMoveForward(e, game.getElapsedTime() + (game.getElapsedTime()*game.getChoco()));
     }
     
 }

@@ -8,6 +8,7 @@ import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.*;
 
 import java.lang.Math;
+import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -22,14 +23,13 @@ public class MyGame extends VariableFrameRateGame
 	private int score=0, choc=0, carry=0;
 	private double lastFrameTime, currFrameTime, elapsedTime;
 
-	private DolphinView rideDolphin;
 	private GameObject dol, cub, sph1, sph2, sph3, sph4, sph5, choc1, choc2, choc3, bigsph, x, y, z;
 	private ObjShape dolS, cubS, sphS, chocS, linxS, linyS, linzS;
 	private TextureImage doltx, brick, ball, choco, bigball;
 	private Light light1;
 
-	private Vector3f loc, fwd, up, right, lastCam;
 	private Camera cam;
+	private CameraOrbitController orbitController;
 
 
 	public MyGame() { super(); }
@@ -169,47 +169,39 @@ public class MyGame extends VariableFrameRateGame
 
 	@Override
 	public void initializeGame()
-	{	lastFrameTime = System.currentTimeMillis();
+	{	
+		lastFrameTime = System.currentTimeMillis();
 		currFrameTime = System.currentTimeMillis();
 		elapsedTime = 0.0;
 		(engine.getRenderSystem()).setWindowDimensions(1900,1000);
 
-		// ------------- positioning the camera -------------
-		(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0,0,5));
-		positionCameraOffAvatar();
-		lastCam = new Vector3f(cam.getLocation());
+		// CREATE VIEWPORTS AND CAMERAS IN GAME
+		createViewports();
 		// ----------------- INPUTS SECTION ----------------------------- 
-		im = engine.getInputManager(); 
+		im = engine.getInputManager();
+		String gpName = im.getFirstGamepadName();
 
-		rideDolphin = new DolphinView(this);
+		Camera c = (engine.getRenderSystem()).getViewport("LEFT").getCamera();
+		orbitController = new CameraOrbitController(c, dol, gpName, engine);
 
+		// ------------- OTHER INPUTS SECTION --------------
 		ForwardAction fwdAction = new ForwardAction(this); 
 		TurnLeftAction turnLeftAction = new TurnLeftAction(this); 
 		BackwardAction bwdAction = new BackwardAction(this);
 		TurnRightAction turnRightAction = new TurnRightAction(this);
 
-		PitchUpAction pitchUpAction = new PitchUpAction(this);
-		PitchDownAction pitchDownAction = new PitchDownAction(this);
+		//GamepadTurn padTurn = new GamepadTurn(this);
+		//GamepadMove padMove = new GamepadMove(this);
 
-		GamepadYaw padYaw = new GamepadYaw(this);
-		GamepadMove padMove = new GamepadMove(this);
-		GamepadPitch padPitch = new GamepadPitch(this);
-
-		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.SPACE, rideDolphin, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY); 
 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.W, fwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnLeftAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.S, bwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnRightAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
+		
+		//im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Axis.Y, padMove, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		//im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Axis.X, padTurn, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 
-		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.UP, pitchUpAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
-		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.DOWN, pitchDownAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
-
-		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Axis.X, padYaw, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
-		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Axis.Y, padMove, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
-		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Axis.RY, padPitch, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Button._2, rideDolphin, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 	}
 
 	public Engine getEngine() {
@@ -228,83 +220,72 @@ public class MyGame extends VariableFrameRateGame
 		return (float)((currFrameTime - lastFrameTime) / 1000.0);
 	}
 
-	public boolean getDolphinView() {
-		return rideDolphin.toggleRide();
-	}
-
 	public int getChoco() {
 		return choc;
 	}
 
-	public boolean isCamAway() {
-		return (cam.getLocation().x() >= 4 + dol.getWorldLocation().x() || cam.getLocation().x() <= -4 + dol.getWorldLocation().x()) 
-			|| (cam.getLocation().z() >= 4 + dol.getWorldLocation().z() || cam.getLocation().z() <= -4 + dol.getWorldLocation().z()) 
-			|| (cam.getLocation().y() >= 4 + dol.getWorldLocation().y() || cam.getLocation().y() <= -4 + dol.getWorldLocation().y());
+	@Override
+	public void createViewports()
+	{ 
+		(engine.getRenderSystem()).addViewport("LEFT",0,0,1f,1f);
+		(engine.getRenderSystem()).addViewport("RIGHT",.75f,0,.25f,.25f);
+
+		Viewport leftVp = (engine.getRenderSystem()).getViewport("LEFT");
+		Viewport rightVp = (engine.getRenderSystem()).getViewport("RIGHT");
+		Camera leftCamera = leftVp.getCamera();
+		Camera rightCamera = rightVp.getCamera();
+
+		rightVp.setHasBorder(true);
+		rightVp.setBorderWidth(4);
+		rightVp.setBorderColor(0.0f, 1.0f, 0.0f);
+
+		leftCamera.setLocation(new Vector3f(-2,0,2));
+		leftCamera.setU(new Vector3f(1,0,0));
+		leftCamera.setV(new Vector3f(0,1,0));
+		leftCamera.setN(new Vector3f(0,0,-1));
+		
+		rightCamera.setLocation(new Vector3f(0,2,0));
+		rightCamera.setU(new Vector3f(1,0,0));
+		rightCamera.setV(new Vector3f(0,0,-1));
+		rightCamera.setN(new Vector3f(0,-1,0));
 	}
 
-	public void positionCameraBehindAvatar()
-	{
-		cam = (engine.getRenderSystem().getViewport("MAIN").getCamera()); 
-		loc = dol.getWorldLocation(); 
-		fwd = dol.getWorldForwardVector(); 
-		up = dol.getWorldUpVector(); 
-		right = dol.getWorldRightVector(); 
-		cam.setU(right); 
-		cam.setV(up); 
-		cam.setN(fwd); 
-		cam.setLocation(loc.add(up.mul(1.3f)).add(fwd.mul(-1.8f)));
-	}
+	// public void collideCamToPrize(GameObject obj)
+	// {
+	// 	if(cam.getLocation().x() - obj.getWorldLocation().x() <= 0.4 && cam.getLocation().x() - obj.getWorldLocation().x() >= -0.4
+	// 	&& cam.getLocation().y() - obj.getWorldLocation().y() <= 0.4 && cam.getLocation().y() - obj.getWorldLocation().y() >= -0.4
+	// 	&& cam.getLocation().z() - obj.getWorldLocation().z() <= 0.4 && cam.getLocation().z() - obj.getWorldLocation().z() >= -0.4
+	// 	&& engine.getSceneGraph().getGameObjects().contains(obj))
+	// 	{
+	// 		carry += 1;
+	// 		engine.getSceneGraph().removeGameObject(obj);
+	// 	}
+	// }
 
-	public void positionCameraOffAvatar()
-	{
-		cam = (engine.getRenderSystem().getViewport("MAIN").getCamera()); 
-		loc = dol.getWorldLocation(); 
-		fwd = dol.getWorldForwardVector(); 
-		up = dol.getWorldUpVector(); 
-		right = dol.getWorldRightVector(); 
-		cam.setU(right); 
-		cam.setV(up); 
-		cam.setN(fwd); 
-		cam.setLocation(loc.add(up.mul(0.7f)).add(right.mul(0.7f)).add(fwd.mul(-0.8f)));
-	}
+	// public void collideCamToChoc(GameObject obj)
+	// {
+	// 	if(cam.getLocation().x() - obj.getWorldLocation().x() <= 0.4 && cam.getLocation().x() - obj.getWorldLocation().x() >= -0.4
+	// 	&& cam.getLocation().y() - obj.getWorldLocation().y() <= 0.4 && cam.getLocation().y() - obj.getWorldLocation().y() >= -0.4
+	// 	&& cam.getLocation().z() - obj.getWorldLocation().z() <= 0.4 && cam.getLocation().z() - obj.getWorldLocation().z() >= -0.4
+	// 	&& engine.getSceneGraph().getGameObjects().contains(obj))
+	// 	{
+	// 		choc += 1;
+	// 		engine.getSceneGraph().removeGameObject(obj);
+	// 	}
+	// }
 
-
-	public void collideCamToPrize(GameObject obj)
-	{
-		if(cam.getLocation().x() - obj.getWorldLocation().x() <= 0.4 && cam.getLocation().x() - obj.getWorldLocation().x() >= -0.4
-		&& cam.getLocation().y() - obj.getWorldLocation().y() <= 0.4 && cam.getLocation().y() - obj.getWorldLocation().y() >= -0.4
-		&& cam.getLocation().z() - obj.getWorldLocation().z() <= 0.4 && cam.getLocation().z() - obj.getWorldLocation().z() >= -0.4
-		&& engine.getSceneGraph().getGameObjects().contains(obj))
-		{
-			carry += 1;
-			engine.getSceneGraph().removeGameObject(obj);
-		}
-	}
-
-	public void collideCamToChoc(GameObject obj)
-	{
-		if(cam.getLocation().x() - obj.getWorldLocation().x() <= 0.4 && cam.getLocation().x() - obj.getWorldLocation().x() >= -0.4
-		&& cam.getLocation().y() - obj.getWorldLocation().y() <= 0.4 && cam.getLocation().y() - obj.getWorldLocation().y() >= -0.4
-		&& cam.getLocation().z() - obj.getWorldLocation().z() <= 0.4 && cam.getLocation().z() - obj.getWorldLocation().z() >= -0.4
-		&& engine.getSceneGraph().getGameObjects().contains(obj))
-		{
-			choc += 1;
-			engine.getSceneGraph().removeGameObject(obj);
-		}
-	}
-
-	public void collideCamToFeed(GameObject obj)
-	{
-		if(cam.getLocation().x() - obj.getWorldLocation().x() <= 1.0 && cam.getLocation().x() - obj.getWorldLocation().x() >= -1.0
-		&& cam.getLocation().y() - obj.getWorldLocation().y() <= 1.0 && cam.getLocation().y() - obj.getWorldLocation().y() >= -1.0
-		&& cam.getLocation().z() - obj.getWorldLocation().z() <= 1.0 && cam.getLocation().z() - obj.getWorldLocation().z() >= -1.0)
-		{
-			if(carry != 0) {
-				score += carry;
-			}	
-			carry = 0;
-		}
-	}
+	// public void collideCamToFeed(GameObject obj)
+	// {
+	// 	if(cam.getLocation().x() - obj.getWorldLocation().x() <= 1.0 && cam.getLocation().x() - obj.getWorldLocation().x() >= -1.0
+	// 	&& cam.getLocation().y() - obj.getWorldLocation().y() <= 1.0 && cam.getLocation().y() - obj.getWorldLocation().y() >= -1.0
+	// 	&& cam.getLocation().z() - obj.getWorldLocation().z() <= 1.0 && cam.getLocation().z() - obj.getWorldLocation().z() >= -1.0)
+	// 	{
+	// 		if(carry != 0) {
+	// 			score += carry;
+	// 		}	
+	// 		carry = 0;
+	// 	}
+	// }
 
 	@Override
 	public void update()
@@ -312,7 +293,6 @@ public class MyGame extends VariableFrameRateGame
 		lastFrameTime = currFrameTime;
 		currFrameTime = System.currentTimeMillis();
 		elapsedTime += (currFrameTime - lastFrameTime) / 1000.0;
-
 
 		//build and set HUD
 		int elapsedTimeSec = Math.round((float)elapsedTime);
@@ -330,29 +310,15 @@ public class MyGame extends VariableFrameRateGame
 		//update inputs and camera
 		im.update((float)elapsedTime);
 		
-		if(isCamAway() && getDolphinView() == false)
-		{
-			cam.setLocation(lastCam);
-		}
-		
-		lastCam = cam.getLocation();
-		
-		if(this.getDolphinView() == true) {
-			positionCameraBehindAvatar();
-		}
-		if(this.getDolphinView() == false) {
-			collideCamToPrize(sph1);
-			collideCamToPrize(sph2);
-			collideCamToPrize(sph3);
-			collideCamToPrize(sph4);
-			collideCamToPrize(sph5);
-			collideCamToChoc(choc1);
-			collideCamToChoc(choc2);
-			collideCamToChoc(choc3);
-			collideCamToFeed(bigsph);
-		}
-
-		
+		// collideCamToPrize(sph1);
+		// collideCamToPrize(sph2);
+		// collideCamToPrize(sph3);
+		// collideCamToPrize(sph4);
+		// collideCamToPrize(sph5);
+		// collideCamToChoc(choc1);
+		// collideCamToChoc(choc2);
+		// collideCamToChoc(choc3);
+		// collideCamToFeed(bigsph);
 
 		//rotate balls
 		sph1.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
@@ -369,10 +335,7 @@ public class MyGame extends VariableFrameRateGame
 		//rotate big ball
 		bigsph.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
 
-		
-
-		
-		
+		orbitController.updateCameraPosition();
 	}
 
 }

@@ -28,10 +28,10 @@ public class ManualObj extends ManualObject
  
     public ManualObj() 
     {   super(); 
-        vertices[0] = (new Vector3f()).set(1.8f, 1.0f, 1.8f); //top
-        vertices[1] = (new Vector3f()).set(1.8f, 1.0f, -1.8f); 
-        vertices[2] = (new Vector3f()).set(-1.8f, 1.0f, -1.8f); 
-        vertices[3] = (new Vector3f()).set(-1.8f, 1.0f, 1.8f); 
+        vertices[0] = (new Vector3f()).set(1.4f, 1.0f, 1.4f); //top
+        vertices[1] = (new Vector3f()).set(1.4f, 1.0f, -1.4f); 
+        vertices[2] = (new Vector3f()).set(-1.4f, 1.0f, -1.4f); 
+        vertices[3] = (new Vector3f()).set(-1.4f, 1.0f, 1.4f); 
         vertices[4] = (new Vector3f()).set(2.0f, -1.0f, 2.0f);  //bottom
         vertices[5] = (new Vector3f()).set(-2.0f, -1.0f, 2.0f); 
         vertices[6] = (new Vector3f()).set(-2.0f, -1.0f, -2.0f); 

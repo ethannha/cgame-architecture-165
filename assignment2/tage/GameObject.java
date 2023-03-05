@@ -446,33 +446,7 @@ public class GameObject
         this.setLocalRotation(rotAroundAvatarUp);
 	}
 
-	public void objPitchUp(Event e, float elapsedTime)
-	{
-        float keyValue = e.getValue(); 
-        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
-
-		oldRotation = new Matrix4f(this.getWorldRotation()); 
-        oldUp = new Vector4f(-1f,0f,0f,1f).mul(oldRotation); 
-        rotAroundAvatarUp = new Matrix4f().rotation(elapsedTime, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z())); 
-        newRotation = oldRotation; 
-        rotAroundAvatarUp.mul(newRotation); 
-        this.setLocalRotation(rotAroundAvatarUp); 
-	}
-
-	public void objPitchDown(Event e, float elapsedTime)
-	{
-        float keyValue = e.getValue(); 
-        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
-
-		oldRotation = new Matrix4f(this.getWorldRotation()); 
-        oldUp = new Vector4f(1f,0f,0f,1f).mul(oldRotation); 
-        rotAroundAvatarUp = new Matrix4f().rotation(elapsedTime, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z())); 
-        newRotation = oldRotation; 
-        rotAroundAvatarUp.mul(newRotation); 
-        this.setLocalRotation(rotAroundAvatarUp); 
-	}
-
-	public void Yaw(Event e, float elapsedTime)
+	public void objGPTurn(Event e, float elapsedTime)
 	{
         float keyValue = e.getValue(); 
         if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
