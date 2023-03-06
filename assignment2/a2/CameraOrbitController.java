@@ -34,9 +34,12 @@ public class CameraOrbitController
         OrbitElevationAction elvAction = new OrbitElevationAction();
         OrbitRadiusAction rdsAction = new OrbitRadiusAction();
         InputManager im = engine.getInputManager();
-        im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.RX, azmAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.RY, elvAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.Y, rdsAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+        if(gp != null) {
+            im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.RX, azmAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+            im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.RY, elvAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+            im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.Y, rdsAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        }
     }
 
     // Compute the camera’s azimuth, elevation, and distance, relative to

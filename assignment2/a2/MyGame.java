@@ -20,6 +20,7 @@ public class MyGame extends VariableFrameRateGame
 	private static Engine engine;
 	private InputManager im;
 
+	private ToggleAxis axisToggle;
 	private int score=0, choc=0, carry=0;
 	private double lastFrameTime, currFrameTime, elapsedTime;
 
@@ -28,7 +29,7 @@ public class MyGame extends VariableFrameRateGame
 	private TextureImage doltx, brick, ball, choco, bigball;
 	private Light light1;
 
-	private Camera cam;
+	private Camera cam, leftCamera, rightCamera;
 	private CameraOrbitController orbitController;
 
 
@@ -47,6 +48,8 @@ public class MyGame extends VariableFrameRateGame
 		sphS = new Sphere();
 		cubS = new Cube();
 		chocS = new ManualObj();
+		
+        // load line object shapes
 		linxS = new Line(new Vector3f(0f,0f,0f), new Vector3f(3f,0f,0f)); 
 		linyS = new Line(new Vector3f(0f,0f,0f), new Vector3f(0f,3f,0f)); 
 		linzS = new Line(new Vector3f(0f,0f,0f), new Vector3f(0f,0f,-3f));
@@ -75,6 +78,15 @@ public class MyGame extends VariableFrameRateGame
 		dol.setLocalScale(initialScale);
   		dol.setLocalRotation(initialRotation); 
 
+		// add X,Y,Z axes 
+		x = new GameObject(GameObject.root(), linxS); 
+		y = new GameObject(GameObject.root(), linyS); 
+		z = new GameObject(GameObject.root(), linzS); 
+
+		// render axes
+		(x.getRenderStates()).setColor(new Vector3f(1f,0f,0f)); 
+		(y.getRenderStates()).setColor(new Vector3f(0f,1f,0f)); 
+		(z.getRenderStates()).setColor(new Vector3f(0f,0f,1f)); 
 		
 		//build sphere as prize 1
 		sph1 = new GameObject(GameObject.root(), sphS, ball);
@@ -146,14 +158,6 @@ public class MyGame extends VariableFrameRateGame
 		cub.setLocalTranslation(initialTranslation); 
 		cub.setLocalScale(initialScale); 
 
-		// add X,Y,Z axes 
-		x = new GameObject(GameObject.root(), linxS); 
-		y = new GameObject(GameObject.root(), linyS); 
-		z = new GameObject(GameObject.root(), linzS); 
-		(x.getRenderStates()).setColor(new Vector3f(1f,0f,0f)); 
-		(y.getRenderStates()).setColor(new Vector3f(0f,1f,0f)); 
-		(z.getRenderStates()).setColor(new Vector3f(0f,0f,1f)); 
-
 	}
 
 	@Override
@@ -181,23 +185,30 @@ public class MyGame extends VariableFrameRateGame
 		im = engine.getInputManager();
 		String gpName = im.getFirstGamepadName();
 
-		Camera c = (engine.getRenderSystem()).getViewport("LEFT").getCamera();
-		orbitController = new CameraOrbitController(c, dol, gpName, engine);
+		cam = (engine.getRenderSystem()).getViewport("LEFT").getCamera();
+		orbitController = new CameraOrbitController(cam, dol, gpName, engine);
 
 		// ------------- OTHER INPUTS SECTION --------------
 		ForwardAction fwdAction = new ForwardAction(this); 
 		TurnLeftAction turnLeftAction = new TurnLeftAction(this); 
 		BackwardAction bwdAction = new BackwardAction(this);
 		TurnRightAction turnRightAction = new TurnRightAction(this);
+		axisToggle = new ToggleAxis(this);
 
 		//GamepadTurn padTurn = new GamepadTurn(this);
 		//GamepadMove padMove = new GamepadMove(this);
 
+		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.M, axisToggle, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.W, fwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnLeftAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.S, bwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
-		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnRightAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
+		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnRightAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.I, fwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
+		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.J, turnLeftAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
+		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.K, bwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
+		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.L, turnRightAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		
 		//im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Axis.Y, padMove, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		//im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Axis.X, padTurn, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
@@ -224,6 +235,11 @@ public class MyGame extends VariableFrameRateGame
 		return choc;
 	}
 
+	public boolean getAxisOn()
+	{
+		return axisToggle.axisOn();
+	}
+
 	@Override
 	public void createViewports()
 	{ 
@@ -232,15 +248,15 @@ public class MyGame extends VariableFrameRateGame
 
 		Viewport leftVp = (engine.getRenderSystem()).getViewport("LEFT");
 		Viewport rightVp = (engine.getRenderSystem()).getViewport("RIGHT");
-		Camera leftCamera = leftVp.getCamera();
-		Camera rightCamera = rightVp.getCamera();
+		leftCamera = leftVp.getCamera();
+		rightCamera = rightVp.getCamera();
 
 		rightVp.setHasBorder(true);
 		rightVp.setBorderWidth(4);
 		rightVp.setBorderColor(0.0f, 1.0f, 0.0f);
 
 		leftCamera.setLocation(new Vector3f(-2,0,2));
-		leftCamera.setU(new Vector3f(1,0,0));
+		leftCamera.setU(new Vector3f(1 + dol.getWorldLocation().x(),0,0));
 		leftCamera.setV(new Vector3f(0,1,0));
 		leftCamera.setN(new Vector3f(0,0,-1));
 		
@@ -248,6 +264,14 @@ public class MyGame extends VariableFrameRateGame
 		rightCamera.setU(new Vector3f(1,0,0));
 		rightCamera.setV(new Vector3f(0,0,-1));
 		rightCamera.setN(new Vector3f(0,-1,0));
+
+		
+	}
+
+	public void toggleAxis() {
+		engine.getSceneGraph().removeGameObject(x);
+		engine.getSceneGraph().removeGameObject(y);
+		engine.getSceneGraph().removeGameObject(z);
 	}
 
 	// public void collideCamToPrize(GameObject obj)
