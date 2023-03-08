@@ -6,7 +6,7 @@ import net.java.games.input.Event;
 public class ToggleAxis extends AbstractInputAction 
 {
     private MyGame game;
-    private boolean toggle = true;
+    private boolean toggle = true;  //default value true, axes displayed on
 
     public ToggleAxis(MyGame g) 
     { 
@@ -22,7 +22,8 @@ public class ToggleAxis extends AbstractInputAction
     public void performAction(float time, Event e) 
     {
         toggle = !toggle;
-        if(toggle == false) game.toggleAxis();
+        if(toggle == true) game.toggleAxisOn();
+        if(toggle == false) game.toggleAxisOff();
     }
 
 }

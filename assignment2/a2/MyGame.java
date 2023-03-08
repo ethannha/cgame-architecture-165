@@ -20,7 +20,6 @@ public class MyGame extends VariableFrameRateGame
 	private static Engine engine;
 	private InputManager im;
 
-	private ToggleAxis axisToggle;
 	private int score=0, choc=0, carry=0;
 	private double lastFrameTime, currFrameTime, elapsedTime;
 
@@ -193,12 +192,12 @@ public class MyGame extends VariableFrameRateGame
 		TurnLeftAction turnLeftAction = new TurnLeftAction(this); 
 		BackwardAction bwdAction = new BackwardAction(this);
 		TurnRightAction turnRightAction = new TurnRightAction(this);
-		axisToggle = new ToggleAxis(this);
+		ToggleAxis axisToggle = new ToggleAxis(this);
 
 		//GamepadTurn padTurn = new GamepadTurn(this);
 		//GamepadMove padMove = new GamepadMove(this);
 
-		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.M, axisToggle, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
+		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.M, axisToggle, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY); 
 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.W, fwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnLeftAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
@@ -235,11 +234,6 @@ public class MyGame extends VariableFrameRateGame
 		return choc;
 	}
 
-	public boolean getAxisOn()
-	{
-		return axisToggle.axisOn();
-	}
-
 	@Override
 	public void createViewports()
 	{ 
@@ -264,14 +258,18 @@ public class MyGame extends VariableFrameRateGame
 		rightCamera.setU(new Vector3f(1,0,0));
 		rightCamera.setV(new Vector3f(0,0,-1));
 		rightCamera.setN(new Vector3f(0,-1,0));
-
-		
 	}
 
-	public void toggleAxis() {
-		engine.getSceneGraph().removeGameObject(x);
-		engine.getSceneGraph().removeGameObject(y);
-		engine.getSceneGraph().removeGameObject(z);
+	public void toggleAxisOn() {
+		x.getRenderStates().enableRendering();
+		y.getRenderStates().enableRendering();
+		z.getRenderStates().enableRendering();
+	}
+
+	public void toggleAxisOff() {
+		x.getRenderStates().disableRendering();
+		y.getRenderStates().disableRendering();
+		z.getRenderStates().disableRendering();
 	}
 
 	// public void collideCamToPrize(GameObject obj)
