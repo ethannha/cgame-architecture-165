@@ -36,8 +36,8 @@ public class CameraOverheadController
         TranslateZNeg transZNeg = new TranslateZNeg();
         InputManager im = engine.getInputManager();
 
-        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.U, transRadPos, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.O, transRadNeg, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.O, transRadPos, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.U, transRadNeg, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
         im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.I, transZNeg, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.J, transXNeg, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
@@ -55,6 +55,8 @@ public class CameraOverheadController
         float z = cameraNewZ;
         camera.setLocation(new Vector3f(x,y,z));
     }
+
+
 
     private class TranslateRadiusPos extends AbstractInputAction    //zoom out - key U
     {

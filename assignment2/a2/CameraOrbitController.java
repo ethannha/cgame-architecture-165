@@ -33,6 +33,13 @@ public class CameraOrbitController
         OrbitAzimuthAction azmAction = new OrbitAzimuthAction();
         OrbitElevationAction elvAction = new OrbitElevationAction();
         OrbitRadiusAction rdsAction = new OrbitRadiusAction();
+
+        kbAzimuthUp kbAziUp = new kbAzimuthUp();
+        kbAzimuthDown kbAziDown = new kbAzimuthDown();
+        kbElevateUp kbElvUp = new kbElevateUp();
+        kbElevateDown kbElvDown = new kbElevateDown();
+        kbRadiusUp kbRdsUp = new kbRadiusUp();
+        kbRadiusDown kbRdsDown = new kbRadiusDown();
         InputManager im = engine.getInputManager();
 
         if(gp != null) {
@@ -40,6 +47,15 @@ public class CameraOrbitController
             im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.RY, elvAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
             im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.Y, rdsAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         }
+
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.PAGEUP, kbRdsDown, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.PAGEDOWN, kbRdsUp, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.UP, kbElvUp, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.LEFT, kbAziDown, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.DOWN, kbElvDown, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.RIGHT, kbAziUp, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
     }
 
     // Compute the camera’s azimuth, elevation, and distance, relative to
@@ -109,6 +125,59 @@ public class CameraOrbitController
 
             if(cameraRadius + rdsAmount > 2.0f && cameraRadius + rdsAmount < 20.0f)
             { cameraRadius += rdsAmount; }
+            updateCameraPosition();
+        }
+    }
+
+    private class kbRadiusUp extends AbstractInputAction
+    {
+        public void performAction(float time, Event event)
+        { 
+            cameraRadius += 0.2;
+            updateCameraPosition();
+        }
+    }
+    private class kbRadiusDown extends AbstractInputAction
+    {
+        public void performAction(float time, Event event)
+        { 
+            cameraRadius += -0.2;
+            updateCameraPosition();
+        }
+    }
+    private class kbElevateUp extends AbstractInputAction
+    {
+        public void performAction(float time, Event event)
+        { 
+            cameraElevation += 0.2;
+            cameraElevation = cameraElevation % 360;
+            updateCameraPosition();
+        }
+    }
+    private class kbElevateDown extends AbstractInputAction
+    {
+        public void performAction(float time, Event event)
+        { 
+            cameraElevation += -0.2;
+            cameraElevation = cameraElevation % 360;
+            updateCameraPosition();
+        }
+    }
+    private class kbAzimuthUp extends AbstractInputAction
+    {
+        public void performAction(float time, Event event)
+        { 
+            cameraAzimuth += 0.2;
+            cameraAzimuth = cameraAzimuth % 360;
+            updateCameraPosition();
+        }
+    }
+    private class kbAzimuthDown extends AbstractInputAction
+    {
+        public void performAction(float time, Event event)
+        { 
+            cameraAzimuth += -0.2;
+            cameraAzimuth = cameraAzimuth % 360;
             updateCameraPosition();
         }
     }

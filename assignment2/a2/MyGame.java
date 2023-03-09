@@ -4,6 +4,7 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.*;
 import tage.input.action.*;
+import tage.nodeControllers.RotationController;
 import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.*;
 
@@ -22,8 +23,9 @@ public class MyGame extends VariableFrameRateGame
 
 	private int score=0, choc=0, carry=0;
 	private double lastFrameTime, currFrameTime, elapsedTime;
+	private String xCount, yCount, zCount;
 
-	private GameObject dol, cub, sph1, sph2, sph3, sph4, sph5, choc1, choc2, choc3, bigsph, x, y, z, plane;
+	private GameObject dol, cub, sph1, sph2, sph3, sph4, sph5, choc1, choc2, choc3, bigsph, xAxis, yAxis, zAxis, plane;
 	private ObjShape dolS, cubS, sphS, chocS, linxS, linyS, linzS, planeS;
 	private TextureImage doltx, brick, ball, choco, bigball, lime;
 	private Light light1;
@@ -31,7 +33,10 @@ public class MyGame extends VariableFrameRateGame
 	private Camera cam, leftCamera, rightCamera;
 	private CameraOrbitController orbitController;
 	private CameraOverheadController overController;
-
+	private Viewport leftVp, rightVp;
+	private NodeController rc, sc;
+	private ArrayList<GameObject> sphereCollection = new ArrayList<GameObject>();
+	private ArrayList<GameObject> chocoCollection = new ArrayList<GameObject>();
 
 	public MyGame() { super(); }
 
@@ -86,81 +91,89 @@ public class MyGame extends VariableFrameRateGame
 		plane.setLocalScale((new Matrix4f()).scaling(20.0f));
 
 		// add X,Y,Z axes 
-		x = new GameObject(GameObject.root(), linxS); 
-		y = new GameObject(GameObject.root(), linyS); 
-		z = new GameObject(GameObject.root(), linzS); 
+		xAxis = new GameObject(GameObject.root(), linxS); 
+		yAxis = new GameObject(GameObject.root(), linyS); 
+		zAxis = new GameObject(GameObject.root(), linzS); 
 
 		// render axes
-		(x.getRenderStates()).setColor(new Vector3f(1f,0f,0f)); 
-		(y.getRenderStates()).setColor(new Vector3f(0f,1f,0f)); 
-		(z.getRenderStates()).setColor(new Vector3f(0f,0f,1f)); 
+		(xAxis.getRenderStates()).setColor(new Vector3f(1f,0f,0f)); 
+		(yAxis.getRenderStates()).setColor(new Vector3f(0f,1f,0f)); 
+		(zAxis.getRenderStates()).setColor(new Vector3f(0f,0f,1f)); 
 		
 		//build sphere as prize 1
 		sph1 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(1 + rand.nextInt(6), 1 + rand.nextInt(6), rand.nextInt(6) + (-rand.nextInt(6))); 
-		initialScale = (new Matrix4f()).scaling(0.3f); 
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph1.setLocalTranslation(initialTranslation); 
 		sph1.setLocalScale(initialScale); 
+		sphereCollection.add(sph1);
 		
 		//build sphere as prize 2
 		sph2 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(1 + rand.nextInt(6), 1 + rand.nextInt(6), rand.nextInt(6) + (-rand.nextInt(6))); 
-		initialScale = (new Matrix4f()).scaling(0.3f); 
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph2.setLocalTranslation(initialTranslation); 
 		sph2.setLocalScale(initialScale); 
+		sphereCollection.add(sph2);
 
 		//build sphere as prize 3
 		sph3 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(1 + rand.nextInt(6), 1 + rand.nextInt(6), rand.nextInt(6) + (-rand.nextInt(6))); 
-		initialScale = (new Matrix4f()).scaling(0.3f); 
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph3.setLocalTranslation(initialTranslation); 
 		sph3.setLocalScale(initialScale); 
+		sphereCollection.add(sph3);
 
 		//build sphere as prize 4
 		sph4 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(1 + rand.nextInt(6), 1 + rand.nextInt(6), rand.nextInt(6) + (-rand.nextInt(6))); 
-		initialScale = (new Matrix4f()).scaling(0.3f); 
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph4.setLocalTranslation(initialTranslation); 
 		sph4.setLocalScale(initialScale); 
+		sphereCollection.add(sph4);
 
 		//build sphere as prize 5
 		sph5 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(1 + rand.nextInt(6), 1 + rand.nextInt(6), rand.nextInt(6) + (-rand.nextInt(6))); 
-		initialScale = (new Matrix4f()).scaling(0.3f); 
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph5.setLocalTranslation(initialTranslation); 
 		sph5.setLocalScale(initialScale); 
+		sphereCollection.add(sph5);
 		
 		//build big sphere that eats the prizes for score
 		bigsph = new GameObject(GameObject.root(), sphS, bigball);
-		initialTranslation = (new Matrix4f()).translation(5, 2, 5); 
-		initialScale = (new Matrix4f()).scaling(1.0f); 
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(25) + (-rand.nextInt(25)), 1, rand.nextInt(25) + (-rand.nextInt(25))); 
+		initialScale = (new Matrix4f()).scaling(1.3f); 
 		bigsph.setLocalTranslation(initialTranslation); 
 		bigsph.setLocalScale(initialScale); 
 
 		//build manual rectangle object shape as chocolate 1
 		choc1 = new GameObject(GameObject.root(), chocS, choco);
-		initialTranslation = (new Matrix4f()).translation(1 + rand.nextInt(5), 1 + rand.nextInt(5), rand.nextInt(5) + (-rand.nextInt(5))); 
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(18) + (-rand.nextInt(18)), 0, rand.nextInt(18) + (-rand.nextInt(18))); 
 		initialScale = (new Matrix4f()).scaling(0.1f); 
 		choc1.setLocalTranslation(initialTranslation); 
 		choc1.setLocalScale(initialScale); 
+		chocoCollection.add(choc1);
 
 		//build manual rectangle object shape as chocolate 2
 		choc2 = new GameObject(GameObject.root(), chocS, choco);
-		initialTranslation = (new Matrix4f()).translation(1 + rand.nextInt(5), 1 + rand.nextInt(5), rand.nextInt(5) + (-rand.nextInt(5))); 
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(18) + (-rand.nextInt(18)), 0, rand.nextInt(18) + (-rand.nextInt(18))); 
 		initialScale = (new Matrix4f()).scaling(0.1f); 
 		choc2.setLocalTranslation(initialTranslation); 
 		choc2.setLocalScale(initialScale); 
+		chocoCollection.add(choc2);
 
 		//build manual rectangle object shape as chocolate 3
 		choc3 = new GameObject(GameObject.root(), chocS, choco);
-		initialTranslation = (new Matrix4f()).translation(1 + rand.nextInt(5), 1 + rand.nextInt(5), rand.nextInt(5) + (-rand.nextInt(5))); 
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(18) + (-rand.nextInt(18)), 0, rand.nextInt(18) + (-rand.nextInt(18))); 
 		initialScale = (new Matrix4f()).scaling(0.1f); 
 		choc3.setLocalTranslation(initialTranslation); 
 		choc3.setLocalScale(initialScale); 
+		chocoCollection.add(choc3);
 
 		//build cube at the right of the window 
 		cub = new GameObject(GameObject.root(), cubS, brick); 
-		initialTranslation = (new Matrix4f()).translation(15,0,0); 
+		initialTranslation = (new Matrix4f()).translation(15,4,0); 
 		initialScale = (new Matrix4f()).scaling(3.0f); 
 		cub.setLocalTranslation(initialTranslation); 
 		cub.setLocalScale(initialScale); 
@@ -186,17 +199,27 @@ public class MyGame extends VariableFrameRateGame
 		elapsedTime = 0.0;
 		(engine.getRenderSystem()).setWindowDimensions(1900,1000);
 
-		// CREATE VIEWPORTS AND CAMERAS IN GAME
+		// ============ CREATE VIEWPORTS ============
 		createViewports();
-		// ----------------- INPUTS SECTION ----------------------------- 
+
+		// -------------- ROTATION NODE CONTROLLER ------------------
+		rc = new RotationController(engine, new Vector3f(0,1,0), 0.001f);
+		for(int i=0; i < sphereCollection.size(); i++)
+		{
+			rc.addTarget(sphereCollection.get(i));
+		}
+		(engine.getSceneGraph()).addNodeController(rc);
+		rc.toggle();
+
+		// ----------------- INPUTS SECTION ---------------------- 
 		im = engine.getInputManager();
 		String gpName = im.getFirstGamepadName();
 
+		// --------------------- CAMERAS -----------------------
 		cam = (engine.getRenderSystem()).getViewport("LEFT").getCamera();
 		orbitController = new CameraOrbitController(cam, dol, gpName, engine);
 		overController = new CameraOverheadController(rightCamera, engine);
 		
-
 		// ------------- OTHER INPUTS SECTION --------------
 		ForwardAction fwdAction = new ForwardAction(this); 
 		TurnLeftAction turnLeftAction = new TurnLeftAction(this); 
@@ -239,8 +262,8 @@ public class MyGame extends VariableFrameRateGame
 		(engine.getRenderSystem()).addViewport("LEFT",0,0,1f,1f);
 		(engine.getRenderSystem()).addViewport("RIGHT",.75f,0,.25f,.25f);
 
-		Viewport leftVp = (engine.getRenderSystem()).getViewport("LEFT");
-		Viewport rightVp = (engine.getRenderSystem()).getViewport("RIGHT");
+		leftVp = (engine.getRenderSystem()).getViewport("LEFT");
+		rightVp = (engine.getRenderSystem()).getViewport("RIGHT");
 		leftCamera = leftVp.getCamera();
 		rightCamera = rightVp.getCamera();
 
@@ -260,53 +283,53 @@ public class MyGame extends VariableFrameRateGame
 	}
 
 	public void toggleAxisOn() {
-		x.getRenderStates().enableRendering();
-		y.getRenderStates().enableRendering();
-		z.getRenderStates().enableRendering();
+		xAxis.getRenderStates().enableRendering();
+		yAxis.getRenderStates().enableRendering();
+		zAxis.getRenderStates().enableRendering();
 	}
 
 	public void toggleAxisOff() {
-		x.getRenderStates().disableRendering();
-		y.getRenderStates().disableRendering();
-		z.getRenderStates().disableRendering();
+		xAxis.getRenderStates().disableRendering();
+		yAxis.getRenderStates().disableRendering();
+		zAxis.getRenderStates().disableRendering();
 	}
 
-	// public void collideCamToPrize(GameObject obj)
-	// {
-	// 	if(cam.getLocation().x() - obj.getWorldLocation().x() <= 0.4 && cam.getLocation().x() - obj.getWorldLocation().x() >= -0.4
-	// 	&& cam.getLocation().y() - obj.getWorldLocation().y() <= 0.4 && cam.getLocation().y() - obj.getWorldLocation().y() >= -0.4
-	// 	&& cam.getLocation().z() - obj.getWorldLocation().z() <= 0.4 && cam.getLocation().z() - obj.getWorldLocation().z() >= -0.4
-	// 	&& engine.getSceneGraph().getGameObjects().contains(obj))
-	// 	{
-	// 		carry += 1;
-	// 		engine.getSceneGraph().removeGameObject(obj);
-	// 	}
-	// }
+	public void collideCamToPrize(GameObject obj)
+	{
+		if(dol.getWorldLocation().x() - obj.getWorldLocation().x() <= 0.8 && dol.getWorldLocation().x() - obj.getWorldLocation().x() >= -0.8
+		&& dol.getWorldLocation().y() - obj.getWorldLocation().y() <= 0.8 && dol.getWorldLocation().y() - obj.getWorldLocation().y() >= -0.8
+		&& dol.getWorldLocation().z() - obj.getWorldLocation().z() <= 0.8 && dol.getWorldLocation().z() - obj.getWorldLocation().z() >= -0.8
+		&& engine.getSceneGraph().getGameObjects().contains(obj))
+		{
+			carry += 1;
+			engine.getSceneGraph().removeGameObject(obj);
+		}
+	}
 
-	// public void collideCamToChoc(GameObject obj)
-	// {
-	// 	if(cam.getLocation().x() - obj.getWorldLocation().x() <= 0.4 && cam.getLocation().x() - obj.getWorldLocation().x() >= -0.4
-	// 	&& cam.getLocation().y() - obj.getWorldLocation().y() <= 0.4 && cam.getLocation().y() - obj.getWorldLocation().y() >= -0.4
-	// 	&& cam.getLocation().z() - obj.getWorldLocation().z() <= 0.4 && cam.getLocation().z() - obj.getWorldLocation().z() >= -0.4
-	// 	&& engine.getSceneGraph().getGameObjects().contains(obj))
-	// 	{
-	// 		choc += 1;
-	// 		engine.getSceneGraph().removeGameObject(obj);
-	// 	}
-	// }
+	public void collideCamToChoc(GameObject obj)
+	{
+		if(dol.getWorldLocation().x() - obj.getWorldLocation().x() <= 0.8 && dol.getWorldLocation().x() - obj.getWorldLocation().x() >= -0.8
+		&& dol.getWorldLocation().y() - obj.getWorldLocation().y() <= 0.8 && dol.getWorldLocation().y() - obj.getWorldLocation().y() >= -0.8
+		&& dol.getWorldLocation().z() - obj.getWorldLocation().z() <= 0.8 && dol.getWorldLocation().z() - obj.getWorldLocation().z() >= -0.8
+		&& engine.getSceneGraph().getGameObjects().contains(obj))
+		{
+			choc += 1;
+			engine.getSceneGraph().removeGameObject(obj);
+		}
+	}
 
-	// public void collideCamToFeed(GameObject obj)
-	// {
-	// 	if(cam.getLocation().x() - obj.getWorldLocation().x() <= 1.0 && cam.getLocation().x() - obj.getWorldLocation().x() >= -1.0
-	// 	&& cam.getLocation().y() - obj.getWorldLocation().y() <= 1.0 && cam.getLocation().y() - obj.getWorldLocation().y() >= -1.0
-	// 	&& cam.getLocation().z() - obj.getWorldLocation().z() <= 1.0 && cam.getLocation().z() - obj.getWorldLocation().z() >= -1.0)
-	// 	{
-	// 		if(carry != 0) {
-	// 			score += carry;
-	// 		}	
-	// 		carry = 0;
-	// 	}
-	// }
+	public void collideCamToFeed(GameObject obj)
+	{
+		if(dol.getWorldLocation().x() - obj.getWorldLocation().x() <= 1.0 && dol.getWorldLocation().x() - obj.getWorldLocation().x() >= -1.0
+		&& dol.getWorldLocation().y() - obj.getWorldLocation().y() <= 1.0 && dol.getWorldLocation().y() - obj.getWorldLocation().y() >= -1.0
+		&& dol.getWorldLocation().z() - obj.getWorldLocation().z() <= 1.0 && dol.getWorldLocation().z() - obj.getWorldLocation().z() >= -1.0)
+		{
+			if(carry != 0) {
+				score += carry;
+			}	
+			carry = 0;
+		}
+	}
 
 	@Override
 	public void update()
@@ -319,42 +342,30 @@ public class MyGame extends VariableFrameRateGame
 		int elapsedTimeSec = Math.round((float)elapsedTime);
 		String elapsedTimeStr = Integer.toString(elapsedTimeSec);
 		String scoreStr = Integer.toString(score);
-		String carryStr = Integer.toString(carry);
 		String chocStr = Integer.toString(choc);
-		String dispStr1 = "Time: " + elapsedTimeStr;
-		String dispStr2 = "Score: " + scoreStr + " pts   Balls Carried: " + carryStr + "   Choco (SPD+): " + chocStr;
+		xCount = String.format("%.2f", dol.getWorldLocation().x());
+		yCount = String.format("%.2f", dol.getWorldLocation().y());
+		zCount = String.format("%.2f", dol.getWorldLocation().z());
+		String dispStr1 = "Time: " + elapsedTimeStr + "  Score: " + scoreStr + "  Choco (SPD+): " + chocStr;;
+		String dispStr2 = "XYZ: (" + xCount + ", " + yCount + ", " + zCount + ")";
 		Vector3f hud1Color = new Vector3f(1,0,0);
 		Vector3f hud2Color = new Vector3f(0,0,1);
-		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
-		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 500, 15);
+		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 10, 15);
+		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, (int)((engine.getRenderSystem()).getWidth() - rightVp.getActualWidth()), 15);
 		
 		//update inputs and camera
 		im.update((float)elapsedTime);
 		
-		// collideCamToPrize(sph1);
-		// collideCamToPrize(sph2);
-		// collideCamToPrize(sph3);
-		// collideCamToPrize(sph4);
-		// collideCamToPrize(sph5);
-		// collideCamToChoc(choc1);
-		// collideCamToChoc(choc2);
-		// collideCamToChoc(choc3);
-		// collideCamToFeed(bigsph);
-
-		//rotate balls
-		sph1.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
-		sph2.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
-		sph3.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
-		sph4.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
-		sph5.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
-
-		//rotate chocolate
-		choc1.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
-		choc2.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
-		choc3.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
-
-		//rotate big ball
-		bigsph.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
+		//collision with prizes
+		collideCamToPrize(sph1);
+		collideCamToPrize(sph2);
+		collideCamToPrize(sph3);
+		collideCamToPrize(sph4);
+		collideCamToPrize(sph5);
+		collideCamToChoc(choc1);
+		collideCamToChoc(choc2);
+		collideCamToChoc(choc3);
+		collideCamToFeed(bigsph);
 
 		orbitController.updateCameraPosition();
 		overController.updateCameraPosition();
