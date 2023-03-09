@@ -66,9 +66,9 @@ public class CameraOrbitController
         { 
             float rotAmount;
             if (event.getValue() < -0.2)
-            { rotAmount=-0.3f; }
+            { rotAmount=-0.4f; }
             else if (event.getValue() > 0.2)
-            { rotAmount=0.3f; }
+            { rotAmount=0.4f; }
             else
             { rotAmount=0.0f; }
 
@@ -83,9 +83,9 @@ public class CameraOrbitController
         { 
             float elvAmount;
             if (event.getValue() < -0.2)
-            { elvAmount=0.3f; }
+            { elvAmount=0.4f; }
             else if (event.getValue() > 0.2)
-            { elvAmount=-0.3f; }
+            { elvAmount=-0.4f; }
             else
             { elvAmount=0.0f; }
 
@@ -101,9 +101,9 @@ public class CameraOrbitController
         { 
             float rdsAmount;
             if (event.getValue() < -0.2)
-            { rdsAmount=-0.1f; }
+            { rdsAmount=-0.2f; }
             else if (event.getValue() > 0.2)
-            { rdsAmount=0.1f; }
+            { rdsAmount=0.2f; }
             else
             { rdsAmount=0.0f; }
 
@@ -112,17 +112,4 @@ public class CameraOrbitController
             updateCameraPosition();
         }
     }
-
-
-    //1. orbit camera w/o altering avatar heading
-
-
-    //2. adjust camera elevation angle
-
-
-    //3. zoom camera in out on avatar
-
-
-    //4. move and turn dolphin relative to position and orientation of dolphin
-
 }

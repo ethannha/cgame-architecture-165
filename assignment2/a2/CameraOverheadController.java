@@ -11,35 +11,38 @@ public class CameraOverheadController
 { 
     private Engine engine;
     private Camera camera; // the camera being controlled
-    private GameObject avatar; // the target avatar the camera looks at
-    private float cameraAzimuth; // rotation around target Y axis
-    private float cameraElevation; // elevation of camera above target
     private float cameraRadius; // distance between camera and target
+    private float cameraNewX;
+    private float cameraNewZ;
 
-    public CameraOverheadController(Camera cam, GameObject av, String gpName, Engine e)
+    public CameraOverheadController(Camera lrCam, Engine e)
     { 
         engine = e;
-        camera = cam;
-        avatar = av;
-        cameraAzimuth = 0.0f; // start BEHIND and ABOVE the target
-        cameraElevation = 20.0f; // elevation is in degrees
+        camera = lrCam;
         cameraRadius = 2.0f; // distance from camera to avatar
-        setupInputs(gpName);
+        cameraNewX = 0.0f;
+        cameraNewZ = 0.0f;
+        setupInputs();
         updateCameraPosition();
     } 
 
-    private void setupInputs(String gp)
+    private void setupInputs()
     { 
-        OrbitAzimuthAction azmAction = new OrbitAzimuthAction();
-        OrbitElevationAction elvAction = new OrbitElevationAction();
-        OrbitRadiusAction rdsAction = new OrbitRadiusAction();
+        TranslateRadiusPos transRadPos = new TranslateRadiusPos();
+        TranslateRadiusNeg transRadNeg = new TranslateRadiusNeg();
+        TranslateXPos transXPos = new TranslateXPos();
+        TranslateXNeg transXNeg = new TranslateXNeg();
+        TranslateZPos transZPos = new TranslateZPos();
+        TranslateZNeg transZNeg = new TranslateZNeg();
         InputManager im = engine.getInputManager();
 
-        if(gp != null) {
-            im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.RX, azmAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-            im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.RY, elvAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-            im.associateAction(gp, net.java.games.input.Component.Identifier.Axis.Y, rdsAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        }
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.U, transRadPos, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.O, transRadNeg, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.I, transZNeg, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.J, transXNeg, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.K, transZPos, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.L, transXPos, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
     }
 
     // Compute the camera’s azimuth, elevation, and distance, relative to
@@ -47,102 +50,59 @@ public class CameraOverheadController
     // coordinates and set the camera position from that.
     public void updateCameraPosition()
     { 
-        Vector3f avatarRot = avatar.getWorldForwardVector();
-        double avatarAngle = Math.toDegrees((double)
-        avatarRot.angleSigned(new Vector3f(0,0,-1), new Vector3f(0,1,0)));
-        float totalAz = cameraAzimuth - (float)avatarAngle;
-        double theta = Math.toRadians(cameraAzimuth);
-        double phi = Math.toRadians(cameraElevation);
-        float x = cameraRadius * (float)(Math.cos(phi) * Math.sin(theta));
-        float y = cameraRadius * (float)(Math.sin(phi));
-        float z = cameraRadius * (float)(Math.cos(phi) * Math.cos(theta));
-        camera.setLocation(new Vector3f(x,y,z).add(avatar.getWorldLocation()));
-        camera.lookAt(avatar);
+        float x = cameraNewX;
+        float y = cameraRadius;
+        float z = cameraNewZ;
+        camera.setLocation(new Vector3f(x,y,z));
     }
 
-    private class OrbitAzimuthAction extends AbstractInputAction
-    { 
-        public void performAction(float time, Event event)
-        { 
-            float rotAmount;
-            if (event.getValue() < -0.2)
-            { rotAmount=-0.3f; }
-            else if (event.getValue() > 0.2)
-            { rotAmount=0.3f; }
-            else
-            { rotAmount=0.0f; }
-
-        cameraAzimuth += rotAmount;
-        cameraAzimuth = cameraAzimuth % 360;
-        updateCameraPosition();
-        }
-    }
-    private class OrbitElevationAction extends AbstractInputAction
+    private class TranslateRadiusPos extends AbstractInputAction    //zoom out - key U
     {
         public void performAction(float time, Event event)
-        { 
-            float elvAmount;
-            if (event.getValue() < -0.2)
-            { elvAmount=0.3f; }
-            else if (event.getValue() > 0.2)
-            { elvAmount=-0.3f; }
-            else
-            { elvAmount=0.0f; }
-
-            if(cameraElevation + elvAmount > 0.0f && cameraElevation + elvAmount < 80.0f)
-            { cameraElevation += elvAmount; }
-            cameraElevation = cameraElevation % 360;
+        {
+            cameraRadius += 0.1;
             updateCameraPosition();
         }
     }
-    private class OrbitRadiusAction extends AbstractInputAction
+    private class TranslateRadiusNeg extends AbstractInputAction        //zoom in - key O
     {
         public void performAction(float time, Event event)
-        { 
-            float rdsAmount;
-            if (event.getValue() < -0.2)
-            { rdsAmount=-0.1f; }
-            else if (event.getValue() > 0.2)
-            { rdsAmount=0.1f; }
-            else
-            { rdsAmount=0.0f; }
-
-            if(cameraRadius + rdsAmount > 2.0f && cameraRadius + rdsAmount < 20.0f)
-            { cameraRadius += rdsAmount; }
+        {
+            cameraRadius += -0.1;
             updateCameraPosition();
         }
     }
-    private class TranslateX extends AbstractInputAction
+    private class TranslateXPos extends AbstractInputAction     //right dir - key L
     {
         public void performAction(float time, Event event)
         { 
-            float rdsAmount;
-            if (event.getValue() < -0.2)
-            { rdsAmount=-0.1f; }
-            else if (event.getValue() > 0.2)
-            { rdsAmount=0.1f; }
-            else
-            { rdsAmount=0.0f; }
+            cameraNewX += 0.1;
+            updateCameraPosition();
 
-            if(cameraRadius + rdsAmount > 2.0f && cameraRadius + rdsAmount < 20.0f)
-            { cameraRadius += rdsAmount; }
+        }
+    }
+    private class TranslateXNeg extends AbstractInputAction     //left dir - key J
+    {
+        public void performAction(float time, Event event)
+        { 
+            cameraNewX += -0.1;
+            updateCameraPosition();
+
+        }
+    }
+    private class TranslateZPos extends AbstractInputAction     //down dir - key K
+    {
+        public void performAction(float time, Event event)
+        { 
+            cameraNewZ += 0.1;
             updateCameraPosition();
         }
     }
-    private class TranslateZ extends AbstractInputAction
+    private class TranslateZNeg extends AbstractInputAction     //up dir - key I
     {
         public void performAction(float time, Event event)
         { 
-            float rdsAmount;
-            if (event.getValue() < -0.2)
-            { rdsAmount=-0.1f; }
-            else if (event.getValue() > 0.2)
-            { rdsAmount=0.1f; }
-            else
-            { rdsAmount=0.0f; }
-
-            if(cameraRadius + rdsAmount > 2.0f && cameraRadius + rdsAmount < 20.0f)
-            { cameraRadius += rdsAmount; }
+            cameraNewZ += -0.1;
             updateCameraPosition();
         }
     }

@@ -23,13 +23,14 @@ public class MyGame extends VariableFrameRateGame
 	private int score=0, choc=0, carry=0;
 	private double lastFrameTime, currFrameTime, elapsedTime;
 
-	private GameObject dol, cub, sph1, sph2, sph3, sph4, sph5, choc1, choc2, choc3, bigsph, x, y, z;
-	private ObjShape dolS, cubS, sphS, chocS, linxS, linyS, linzS;
-	private TextureImage doltx, brick, ball, choco, bigball;
+	private GameObject dol, cub, sph1, sph2, sph3, sph4, sph5, choc1, choc2, choc3, bigsph, x, y, z, plane;
+	private ObjShape dolS, cubS, sphS, chocS, linxS, linyS, linzS, planeS;
+	private TextureImage doltx, brick, ball, choco, bigball, lime;
 	private Light light1;
 
 	private Camera cam, leftCamera, rightCamera;
 	private CameraOrbitController orbitController;
+	private CameraOverheadController overController;
 
 
 	public MyGame() { super(); }
@@ -47,6 +48,7 @@ public class MyGame extends VariableFrameRateGame
 		sphS = new Sphere();
 		cubS = new Cube();
 		chocS = new ManualObj();
+		planeS = new GamePlane();
 		
         // load line object shapes
 		linxS = new Line(new Vector3f(0f,0f,0f), new Vector3f(3f,0f,0f)); 
@@ -61,6 +63,7 @@ public class MyGame extends VariableFrameRateGame
 		ball = new TextureImage("ball.png");
 		choco = new TextureImage("choco.png");
 		bigball = new TextureImage("bigball.png");
+		lime = new TextureImage("lime.png");
 	}
 
 	@Override
@@ -76,6 +79,11 @@ public class MyGame extends VariableFrameRateGame
 		dol.setLocalTranslation(initialTranslation);
 		dol.setLocalScale(initialScale);
   		dol.setLocalRotation(initialRotation); 
+
+		//build plane
+		plane = new GameObject(GameObject.root(), planeS, lime);
+		plane.setLocalTranslation((new Matrix4f()).translation(0, -1, 0));
+		plane.setLocalScale((new Matrix4f()).scaling(20.0f));
 
 		// add X,Y,Z axes 
 		x = new GameObject(GameObject.root(), linxS); 
@@ -186,6 +194,8 @@ public class MyGame extends VariableFrameRateGame
 
 		cam = (engine.getRenderSystem()).getViewport("LEFT").getCamera();
 		orbitController = new CameraOrbitController(cam, dol, gpName, engine);
+		overController = new CameraOverheadController(rightCamera, engine);
+		
 
 		// ------------- OTHER INPUTS SECTION --------------
 		ForwardAction fwdAction = new ForwardAction(this); 
@@ -194,23 +204,12 @@ public class MyGame extends VariableFrameRateGame
 		TurnRightAction turnRightAction = new TurnRightAction(this);
 		ToggleAxis axisToggle = new ToggleAxis(this);
 
-		//GamepadTurn padTurn = new GamepadTurn(this);
-		//GamepadMove padMove = new GamepadMove(this);
-
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.M, axisToggle, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY); 
 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.W, fwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnLeftAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.S, bwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnRightAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.I, fwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
-		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.J, turnLeftAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
-		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.K, bwdAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
-		im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.L, turnRightAction, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
-		
-		//im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Axis.Y, padMove, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		//im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Key.Axis.X, padTurn, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN); 
 
 	}
 
@@ -249,12 +248,12 @@ public class MyGame extends VariableFrameRateGame
 		rightVp.setBorderWidth(4);
 		rightVp.setBorderColor(0.0f, 1.0f, 0.0f);
 
-		leftCamera.setLocation(new Vector3f(-2,0,2));
-		leftCamera.setU(new Vector3f(1 + dol.getWorldLocation().x(),0,0));
+		leftCamera.setLocation(new Vector3f(-2,0,2));			//sets location of minicam aligning with dol on plane
+		leftCamera.setU(new Vector3f(1,0,0));
 		leftCamera.setV(new Vector3f(0,1,0));
 		leftCamera.setN(new Vector3f(0,0,-1));
 		
-		rightCamera.setLocation(new Vector3f(0,2,0));
+		rightCamera.setLocation(new Vector3f(0,2,0));		//sets location of minicam above dol
 		rightCamera.setU(new Vector3f(1,0,0));
 		rightCamera.setV(new Vector3f(0,0,-1));
 		rightCamera.setN(new Vector3f(0,-1,0));
@@ -358,6 +357,8 @@ public class MyGame extends VariableFrameRateGame
 		bigsph.setLocalRotation(new Matrix4f().rotation((float)elapsedTime, 0, 1, 0));
 
 		orbitController.updateCameraPosition();
+		overController.updateCameraPosition();
+
 	}
 
 }
