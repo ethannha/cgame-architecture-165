@@ -27,7 +27,7 @@ public class CameraOverheadController
     } 
 
     private void setupInputs()
-    { 
+    {
         TranslateRadiusPos transRadPos = new TranslateRadiusPos();
         TranslateRadiusNeg transRadNeg = new TranslateRadiusNeg();
         TranslateXPos transXPos = new TranslateXPos();

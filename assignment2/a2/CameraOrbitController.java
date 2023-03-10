@@ -133,7 +133,8 @@ public class CameraOrbitController
     {
         public void performAction(float time, Event event)
         { 
-            cameraRadius += 0.2;
+            if(cameraRadius + 0.2 > 2.0f)
+                cameraRadius += 0.2;
             updateCameraPosition();
         }
     }
@@ -141,7 +142,8 @@ public class CameraOrbitController
     {
         public void performAction(float time, Event event)
         { 
-            cameraRadius += -0.2;
+            if(cameraRadius - 0.2 > 2.0f)
+                cameraRadius += -0.2;
             updateCameraPosition();
         }
     }
@@ -149,7 +151,8 @@ public class CameraOrbitController
     {
         public void performAction(float time, Event event)
         { 
-            cameraElevation += 0.2;
+            if(cameraElevation + 0.2 > 0.0f)
+                cameraElevation += 0.2;
             cameraElevation = cameraElevation % 360;
             updateCameraPosition();
         }
@@ -158,7 +161,8 @@ public class CameraOrbitController
     {
         public void performAction(float time, Event event)
         { 
-            cameraElevation += -0.2;
+            if(cameraElevation - 0.2 > 0.0f)
+                cameraElevation += -0.2;
             cameraElevation = cameraElevation % 360;
             updateCameraPosition();
         }

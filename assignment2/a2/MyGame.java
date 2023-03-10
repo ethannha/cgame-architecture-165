@@ -4,6 +4,7 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.*;
 import tage.input.action.*;
+import tage.nodeControllers.ChocoController;
 import tage.nodeControllers.RotationController;
 import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.*;
@@ -34,7 +35,7 @@ public class MyGame extends VariableFrameRateGame
 	private CameraOrbitController orbitController;
 	private CameraOverheadController overController;
 	private Viewport leftVp, rightVp;
-	private NodeController rc, sc;
+	private NodeController rc, cc;
 	private ArrayList<GameObject> sphereCollection = new ArrayList<GameObject>();
 	private ArrayList<GameObject> chocoCollection = new ArrayList<GameObject>();
 
@@ -78,7 +79,7 @@ public class MyGame extends VariableFrameRateGame
 
 		//build dolphin in the center of the window 
 		dol = new GameObject(GameObject.root(), dolS, doltx);
-		initialTranslation = (new Matrix4f()).translation(0,0,0);
+		initialTranslation = (new Matrix4f()).translation(0.0f,0.2f,0.0f);
 		initialScale = (new Matrix4f()).scaling(3.0f);
 		initialRotation = (new Matrix4f()).rotationY((float)java.lang.Math.toRadians(135.0f)); 
 		dol.setLocalTranslation(initialTranslation);
@@ -87,7 +88,7 @@ public class MyGame extends VariableFrameRateGame
 
 		//build plane
 		plane = new GameObject(GameObject.root(), planeS, lime);
-		plane.setLocalTranslation((new Matrix4f()).translation(0, -1, 0));
+		plane.setLocalTranslation((new Matrix4f()).translation(0.0f, -0.4f, 0.0f));
 		plane.setLocalScale((new Matrix4f()).scaling(20.0f));
 
 		// add X,Y,Z axes 
@@ -106,6 +107,9 @@ public class MyGame extends VariableFrameRateGame
 		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph1.setLocalTranslation(initialTranslation); 
 		sph1.setLocalScale(initialScale); 
+		// sph1.setParent(bigsph);
+		// sph1.propagateTranslation(true);
+		// sph1.propagateRotation(false);
 		sphereCollection.add(sph1);
 		
 		//build sphere as prize 2
@@ -114,6 +118,9 @@ public class MyGame extends VariableFrameRateGame
 		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph2.setLocalTranslation(initialTranslation); 
 		sph2.setLocalScale(initialScale); 
+		// sph2.setParent(bigsph);
+		// sph2.propagateTranslation(true);
+		// sph2.propagateRotation(false);
 		sphereCollection.add(sph2);
 
 		//build sphere as prize 3
@@ -122,6 +129,9 @@ public class MyGame extends VariableFrameRateGame
 		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph3.setLocalTranslation(initialTranslation); 
 		sph3.setLocalScale(initialScale); 
+		// sph3.setParent(bigsph);
+		// sph3.propagateTranslation(true);
+		// sph3.propagateRotation(false);
 		sphereCollection.add(sph3);
 
 		//build sphere as prize 4
@@ -130,6 +140,9 @@ public class MyGame extends VariableFrameRateGame
 		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph4.setLocalTranslation(initialTranslation); 
 		sph4.setLocalScale(initialScale); 
+		// sph4.setParent(bigsph);
+		// sph4.propagateTranslation(true);
+		// sph4.propagateRotation(false);
 		sphereCollection.add(sph4);
 
 		//build sphere as prize 5
@@ -138,6 +151,9 @@ public class MyGame extends VariableFrameRateGame
 		initialScale = (new Matrix4f()).scaling(0.4f); 
 		sph5.setLocalTranslation(initialTranslation); 
 		sph5.setLocalScale(initialScale); 
+		// sph5.setParent(bigsph);
+		// sph5.propagateTranslation(true);
+		// sph5.propagateRotation(false);
 		sphereCollection.add(sph5);
 		
 		//build big sphere that eats the prizes for score
@@ -146,30 +162,28 @@ public class MyGame extends VariableFrameRateGame
 		initialScale = (new Matrix4f()).scaling(1.3f); 
 		bigsph.setLocalTranslation(initialTranslation); 
 		bigsph.setLocalScale(initialScale); 
+		sphereCollection.add(bigsph);
 
 		//build manual rectangle object shape as chocolate 1
 		choc1 = new GameObject(GameObject.root(), chocS, choco);
 		initialTranslation = (new Matrix4f()).translation(rand.nextInt(18) + (-rand.nextInt(18)), 0, rand.nextInt(18) + (-rand.nextInt(18))); 
-		initialScale = (new Matrix4f()).scaling(0.1f); 
+		initialScale = (new Matrix4f()).scaling(0.2f); 
 		choc1.setLocalTranslation(initialTranslation); 
 		choc1.setLocalScale(initialScale); 
-		chocoCollection.add(choc1);
 
 		//build manual rectangle object shape as chocolate 2
 		choc2 = new GameObject(GameObject.root(), chocS, choco);
 		initialTranslation = (new Matrix4f()).translation(rand.nextInt(18) + (-rand.nextInt(18)), 0, rand.nextInt(18) + (-rand.nextInt(18))); 
-		initialScale = (new Matrix4f()).scaling(0.1f); 
+		initialScale = (new Matrix4f()).scaling(0.2f); 
 		choc2.setLocalTranslation(initialTranslation); 
 		choc2.setLocalScale(initialScale); 
-		chocoCollection.add(choc2);
 
 		//build manual rectangle object shape as chocolate 3
 		choc3 = new GameObject(GameObject.root(), chocS, choco);
 		initialTranslation = (new Matrix4f()).translation(rand.nextInt(18) + (-rand.nextInt(18)), 0, rand.nextInt(18) + (-rand.nextInt(18))); 
-		initialScale = (new Matrix4f()).scaling(0.1f); 
+		initialScale = (new Matrix4f()).scaling(0.2f); 
 		choc3.setLocalTranslation(initialTranslation); 
 		choc3.setLocalScale(initialScale); 
-		chocoCollection.add(choc3);
 
 		//build cube at the right of the window 
 		cub = new GameObject(GameObject.root(), cubS, brick); 
@@ -202,7 +216,7 @@ public class MyGame extends VariableFrameRateGame
 		// ============ CREATE VIEWPORTS ============
 		createViewports();
 
-		// -------------- ROTATION NODE CONTROLLER ------------------
+		// -------------- ROTATION NODE CONTROLLER --------------
 		rc = new RotationController(engine, new Vector3f(0,1,0), 0.001f);
 		for(int i=0; i < sphereCollection.size(); i++)
 		{
@@ -210,6 +224,11 @@ public class MyGame extends VariableFrameRateGame
 		}
 		(engine.getSceneGraph()).addNodeController(rc);
 		rc.toggle();
+
+		// -------------- CHOCO NODE CONTROLLER --------------
+		cc = new ChocoController(engine, dol, 2.0f);
+		(engine.getSceneGraph()).addNodeController(cc);
+		cc.toggle();
 
 		// ----------------- INPUTS SECTION ---------------------- 
 		im = engine.getInputManager();
@@ -313,8 +332,13 @@ public class MyGame extends VariableFrameRateGame
 		&& dol.getWorldLocation().z() - obj.getWorldLocation().z() <= 0.8 && dol.getWorldLocation().z() - obj.getWorldLocation().z() >= -0.8
 		&& engine.getSceneGraph().getGameObjects().contains(obj))
 		{
-			choc += 1;
-			engine.getSceneGraph().removeGameObject(obj);
+			if(chocoCollection.contains(obj) != true)
+			{
+				choc += 1;
+				cc.addTarget(obj);
+				chocoCollection.add(obj);
+			}
+			//engine.getSceneGraph().removeGameObject(obj);
 		}
 	}
 
