@@ -30,6 +30,7 @@ public class MyGame extends VariableFrameRateGame
 	private ObjShape dolS, cubS, sphS, chocS, linxS, linyS, linzS, planeS;
 	private TextureImage doltx, brick, ball, choco, bigball, lime;
 	private Light light1;
+	private Matrix4f currentTranslation;
 
 	private Camera cam, leftCamera, rightCamera;
 	private CameraOrbitController orbitController;
@@ -37,6 +38,7 @@ public class MyGame extends VariableFrameRateGame
 	private Viewport leftVp, rightVp;
 	private NodeController rc, cc;
 	private ArrayList<GameObject> sphereCollection = new ArrayList<GameObject>();
+	private ArrayList<GameObject> returnedSpheres = new ArrayList<GameObject>();
 	private ArrayList<GameObject> chocoCollection = new ArrayList<GameObject>();
 
 	public MyGame() { super(); }
@@ -89,7 +91,7 @@ public class MyGame extends VariableFrameRateGame
 		//build plane
 		plane = new GameObject(GameObject.root(), planeS, lime);
 		plane.setLocalTranslation((new Matrix4f()).translation(0.0f, -0.4f, 0.0f));
-		plane.setLocalScale((new Matrix4f()).scaling(20.0f));
+		plane.setLocalScale((new Matrix4f()).scaling(30.0f));
 
 		// add X,Y,Z axes 
 		xAxis = new GameObject(GameObject.root(), linxS); 
@@ -101,61 +103,6 @@ public class MyGame extends VariableFrameRateGame
 		(yAxis.getRenderStates()).setColor(new Vector3f(0f,1f,0f)); 
 		(zAxis.getRenderStates()).setColor(new Vector3f(0f,0f,1f)); 
 		
-		//build sphere as prize 1
-		sph1 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
-		initialScale = (new Matrix4f()).scaling(0.4f); 
-		sph1.setLocalTranslation(initialTranslation); 
-		sph1.setLocalScale(initialScale); 
-		// sph1.setParent(bigsph);
-		// sph1.propagateTranslation(true);
-		// sph1.propagateRotation(false);
-		sphereCollection.add(sph1);
-		
-		//build sphere as prize 2
-		sph2 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
-		initialScale = (new Matrix4f()).scaling(0.4f); 
-		sph2.setLocalTranslation(initialTranslation); 
-		sph2.setLocalScale(initialScale); 
-		// sph2.setParent(bigsph);
-		// sph2.propagateTranslation(true);
-		// sph2.propagateRotation(false);
-		sphereCollection.add(sph2);
-
-		//build sphere as prize 3
-		sph3 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
-		initialScale = (new Matrix4f()).scaling(0.4f); 
-		sph3.setLocalTranslation(initialTranslation); 
-		sph3.setLocalScale(initialScale); 
-		// sph3.setParent(bigsph);
-		// sph3.propagateTranslation(true);
-		// sph3.propagateRotation(false);
-		sphereCollection.add(sph3);
-
-		//build sphere as prize 4
-		sph4 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
-		initialScale = (new Matrix4f()).scaling(0.4f); 
-		sph4.setLocalTranslation(initialTranslation); 
-		sph4.setLocalScale(initialScale); 
-		// sph4.setParent(bigsph);
-		// sph4.propagateTranslation(true);
-		// sph4.propagateRotation(false);
-		sphereCollection.add(sph4);
-
-		//build sphere as prize 5
-		sph5 = new GameObject(GameObject.root(), sphS, ball);
-		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
-		initialScale = (new Matrix4f()).scaling(0.4f); 
-		sph5.setLocalTranslation(initialTranslation); 
-		sph5.setLocalScale(initialScale); 
-		// sph5.setParent(bigsph);
-		// sph5.propagateTranslation(true);
-		// sph5.propagateRotation(false);
-		sphereCollection.add(sph5);
-		
 		//build big sphere that eats the prizes for score
 		bigsph = new GameObject(GameObject.root(), sphS, bigball);
 		initialTranslation = (new Matrix4f()).translation(rand.nextInt(25) + (-rand.nextInt(25)), 1, rand.nextInt(25) + (-rand.nextInt(25))); 
@@ -163,6 +110,41 @@ public class MyGame extends VariableFrameRateGame
 		bigsph.setLocalTranslation(initialTranslation); 
 		bigsph.setLocalScale(initialScale); 
 		sphereCollection.add(bigsph);
+
+		//build sphere as prize 1
+		sph1 = new GameObject(GameObject.root(), sphS, ball);
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
+		sph1.setLocalTranslation(initialTranslation); 
+		sph1.setLocalScale(initialScale); 
+		
+		//build sphere as prize 2
+		sph2 = new GameObject(GameObject.root(), sphS, ball);
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
+		sph2.setLocalTranslation(initialTranslation); 
+		sph2.setLocalScale(initialScale);
+
+		//build sphere as prize 3
+		sph3 = new GameObject(GameObject.root(), sphS, ball);
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
+		sph3.setLocalTranslation(initialTranslation); 
+		sph3.setLocalScale(initialScale); 
+
+		//build sphere as prize 4
+		sph4 = new GameObject(GameObject.root(), sphS, ball);
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
+		sph4.setLocalTranslation(initialTranslation); 
+		sph4.setLocalScale(initialScale); 
+
+		//build sphere as prize 5
+		sph5 = new GameObject(GameObject.root(), sphS, ball);
+		initialTranslation = (new Matrix4f()).translation(rand.nextInt(20) + (-rand.nextInt(20)), 0, rand.nextInt(20) + (-rand.nextInt(20))); 
+		initialScale = (new Matrix4f()).scaling(0.4f); 
+		sph5.setLocalTranslation(initialTranslation); 
+		sph5.setLocalScale(initialScale); 
 
 		//build manual rectangle object shape as chocolate 1
 		choc1 = new GameObject(GameObject.root(), chocS, choco);
@@ -217,16 +199,13 @@ public class MyGame extends VariableFrameRateGame
 		createViewports();
 
 		// -------------- ROTATION NODE CONTROLLER --------------
-		rc = new RotationController(engine, new Vector3f(0,1,0), 0.001f);
-		for(int i=0; i < sphereCollection.size(); i++)
-		{
-			rc.addTarget(sphereCollection.get(i));
-		}
+		rc = new RotationController(engine, new Vector3f(0,1,0), 0.003f);
+		rc.addTarget(bigsph);
 		(engine.getSceneGraph()).addNodeController(rc);
 		rc.toggle();
 
 		// -------------- CHOCO NODE CONTROLLER --------------
-		cc = new ChocoController(engine, dol, 2.0f);
+		cc = new ChocoController(engine);
 		(engine.getSceneGraph()).addNodeController(cc);
 		cc.toggle();
 
@@ -320,8 +299,15 @@ public class MyGame extends VariableFrameRateGame
 		&& dol.getWorldLocation().z() - obj.getWorldLocation().z() <= 0.8 && dol.getWorldLocation().z() - obj.getWorldLocation().z() >= -0.8
 		&& engine.getSceneGraph().getGameObjects().contains(obj))
 		{
-			carry += 1;
-			engine.getSceneGraph().removeGameObject(obj);
+			if(sphereCollection.contains(obj) != true)
+			{
+				carry += 1;
+				obj.setParent(bigsph);
+				obj.propagateTranslation(false);
+				obj.propagateRotation(true);
+				sphereCollection.add(obj);
+				obj.getRenderStates().disableRendering();
+			}
 		}
 	}
 
@@ -342,14 +328,62 @@ public class MyGame extends VariableFrameRateGame
 		}
 	}
 
-	public void collideCamToFeed(GameObject obj)
+	public void sphTranslationToParent(GameObject obj)
+	{
+		currentTranslation = obj.getLocalTranslation();
+		currentTranslation.translation(bigsph.getLocalLocation().x() + (float)Math.sin(elapsedTime)*2.0f, bigsph.getLocalLocation().y(), bigsph.getLocalLocation().z() + (float)Math.cos(elapsedTime)*2.0f);
+		obj.setLocalTranslation(currentTranslation);
+	}
+
+	public void collideCamToParent(GameObject obj)
 	{
 		if(dol.getWorldLocation().x() - obj.getWorldLocation().x() <= 1.0 && dol.getWorldLocation().x() - obj.getWorldLocation().x() >= -1.0
 		&& dol.getWorldLocation().y() - obj.getWorldLocation().y() <= 1.0 && dol.getWorldLocation().y() - obj.getWorldLocation().y() >= -1.0
 		&& dol.getWorldLocation().z() - obj.getWorldLocation().z() <= 1.0 && dol.getWorldLocation().z() - obj.getWorldLocation().z() >= -1.0)
 		{
-			if(carry != 0) {
+			if(carry != 0) 
+			{
 				score += carry;
+				if(sphereCollection.contains(sph1) == true)
+				{
+					// revolve prizes with bigsphere
+					sphTranslationToParent(sph1);
+					sph1.getRenderStates().enableRendering();
+					sphereCollection.remove(sph1);
+					returnedSpheres.add(sph1);
+				}
+				if(sphereCollection.contains(sph2) == true)
+				{
+					// revolve prizes with bigsphere
+					sphTranslationToParent(sph2);
+					sph2.getRenderStates().enableRendering();
+					sphereCollection.remove(sph2);
+					returnedSpheres.add(sph2);
+				}
+				if(sphereCollection.contains(sph3) == true)
+				{
+					// revolve prizes with bigsphere
+					sphTranslationToParent(sph3);
+					sph3.getRenderStates().enableRendering();
+					sphereCollection.remove(sph3);
+					returnedSpheres.add(sph3);
+				}
+				if(sphereCollection.contains(sph4) == true)
+				{
+					// revolve prizes with bigsphere
+					sphTranslationToParent(sph4);
+					sph4.getRenderStates().enableRendering();
+					sphereCollection.remove(sph4);
+					returnedSpheres.add(sph4);
+				}
+				if(sphereCollection.contains(sph5) == true)
+				{
+					// revolve prizes with bigsphere
+					sphTranslationToParent(sph5);
+					sph5.getRenderStates().enableRendering();
+					sphereCollection.remove(sph5);
+					returnedSpheres.add(sph5);
+				}
 			}	
 			carry = 0;
 		}
@@ -366,11 +400,12 @@ public class MyGame extends VariableFrameRateGame
 		int elapsedTimeSec = Math.round((float)elapsedTime);
 		String elapsedTimeStr = Integer.toString(elapsedTimeSec);
 		String scoreStr = Integer.toString(score);
+		String carryStr = Integer.toString(carry);
 		String chocStr = Integer.toString(choc);
 		xCount = String.format("%.2f", dol.getWorldLocation().x());
 		yCount = String.format("%.2f", dol.getWorldLocation().y());
 		zCount = String.format("%.2f", dol.getWorldLocation().z());
-		String dispStr1 = "Time: " + elapsedTimeStr + "  Score: " + scoreStr + "  Choco (SPD+): " + chocStr;;
+		String dispStr1 = "Time: " + elapsedTimeStr + "  Carrying: " + carryStr + "  Score: " + scoreStr + "  Choco(SPD+): " + chocStr;;
 		String dispStr2 = "XYZ: (" + xCount + ", " + yCount + ", " + zCount + ")";
 		Vector3f hud1Color = new Vector3f(1,0,0);
 		Vector3f hud2Color = new Vector3f(0,0,1);
@@ -379,7 +414,7 @@ public class MyGame extends VariableFrameRateGame
 		
 		//update inputs and camera
 		im.update((float)elapsedTime);
-		
+
 		//collision with prizes
 		collideCamToPrize(sph1);
 		collideCamToPrize(sph2);
@@ -389,7 +424,8 @@ public class MyGame extends VariableFrameRateGame
 		collideCamToChoc(choc1);
 		collideCamToChoc(choc2);
 		collideCamToChoc(choc3);
-		collideCamToFeed(bigsph);
+		collideCamToParent(bigsph);
+
 
 		orbitController.updateCameraPosition();
 		overController.updateCameraPosition();

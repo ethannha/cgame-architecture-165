@@ -102,4 +102,106 @@ public class Camera
 		return(view);
 	}
 
+	/** moves camera forward */
+	public void camMoveForward(Event e, float elapsedTime)
+	{
+        float keyValue = e.getValue(); 
+        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
+		
+        oldPosition = this.getLocation(); 
+        Vector4f nVec = new Vector4f(this.getN(), 1f);
+        fwdDirection = nVec; 
+        fwdDirection.mul(elapsedTime); 
+        newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z()); 
+        this.setLocation(newPosition); 
+	}
+
+	/** moves camera backward */
+	public void camMoveBackward(Event e, float elapsedTime)
+	{
+        float keyValue = e.getValue(); 
+        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
+
+        oldPosition = this.getLocation(); 
+        Vector4f nVec = new Vector4f(this.getN(), 1f);
+        fwdDirection = nVec; 
+        fwdDirection.mul(-elapsedTime); 
+        newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z()); 
+        this.setLocation(newPosition); 
+	}
+
+	/** turns camera to the left */
+	public void camTurnLeft(Event e, float elapsedTime)
+	{
+        float keyValue = e.getValue(); 
+        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
+
+		rightVector = this.getU(); 
+        upVector = this.getV(); 
+        fwdVector = this.getN(); 
+        rightVector.rotateAxis(elapsedTime, upVector.x(), upVector.y(), upVector.z()); 
+        fwdVector.rotateAxis(elapsedTime, upVector.x(), upVector.y(), upVector.z()); 
+        this.setU(rightVector); 
+        this.setN(fwdVector); 
+	}
+
+	/** turns camera to the right */
+	public void camTurnRight(Event e, float elapsedTime)
+	{
+        float keyValue = e.getValue(); 
+        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
+
+		rightVector = this.getU(); 
+        upVector = this.getV(); 
+        fwdVector = this.getN(); 
+        rightVector.rotateAxis(-elapsedTime, upVector.x(), upVector.y(), upVector.z()); 
+        fwdVector.rotateAxis(-elapsedTime, upVector.x(), upVector.y(), upVector.z()); 
+        this.setU(rightVector); 
+        this.setN(fwdVector); 
+	}
+
+	/** pitches camera upwards */
+	public void camPitchUp(Event e, float elapsedTime)
+	{
+        float keyValue = e.getValue(); 
+        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
+
+		rightVector = this.getU(); 
+        upVector = this.getV(); 
+        fwdVector = this.getN(); 
+        upVector.rotateAxis(elapsedTime, rightVector.x(), rightVector.y(), rightVector.z()); 
+        fwdVector.rotateAxis(elapsedTime, rightVector.x(), rightVector.y(), rightVector.z()); 
+        this.setV(upVector); 
+        this.setN(fwdVector); 
+	}
+
+	/** pitches camera downwards */
+	public void camPitchDown(Event e, float elapsedTime)
+	{
+        float keyValue = e.getValue(); 
+        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
+
+		rightVector = this.getU(); 
+        upVector = this.getV(); 
+        fwdVector = this.getN(); 
+        upVector.rotateAxis(-elapsedTime, rightVector.x(), rightVector.y(), rightVector.z()); 
+        fwdVector.rotateAxis(-elapsedTime, rightVector.x(), rightVector.y(), rightVector.z()); 
+        this.setV(upVector); 
+        this.setN(fwdVector); 
+	}
+
+	/** turns camera to the left or right depending on gamepad stick */
+	public void Yaw(Event e, float elapsedTime)
+	{
+        float keyValue = e.getValue(); 
+        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
+
+		rightVector = this.getU(); 
+        upVector = this.getV(); 
+        fwdVector = this.getN(); 
+        rightVector.rotateAxis(elapsedTime, upVector.x(), upVector.y(), upVector.z()); 
+        fwdVector.rotateAxis(elapsedTime, upVector.x(), upVector.y(), upVector.z()); 
+        this.setU(rightVector); 
+        this.setN(fwdVector); 
+	}
 }

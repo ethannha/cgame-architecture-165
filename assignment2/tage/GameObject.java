@@ -394,32 +394,35 @@ public class GameObject
 		}
 	}
 
+	/** moves game object forward */
 	public void objMoveForward(Event e, float elapsedTime)
 	{
         float keyValue = e.getValue(); 
         if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
 
 		oldPosition = this.getWorldLocation(); 
-        fwdDirection = new Vector4f(0f,0f,1f,1f); 
+        fwdDirection = new Vector4f(0f,0f,2f,1f); 
         fwdDirection.mul(this.getWorldRotation()); 
         fwdDirection.mul(elapsedTime); 
         newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z()); 
         setLocalLocation(newPosition); 
 	}
 
+	/** moves game object backward */
 	public void objMoveBackward(Event e, float elapsedTime)
 	{
         float keyValue = e.getValue(); 
         if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
 
 		oldPosition = this.getWorldLocation(); 
-        fwdDirection = new Vector4f(0f,0f,1f,1f); 
+        fwdDirection = new Vector4f(0f,0f,2f,1f); 
         fwdDirection.mul(this.getWorldRotation()); 
         fwdDirection.mul(-elapsedTime); 
         newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z()); 
         setLocalLocation(newPosition); 
 	}
 
+	/** turns game object to the left */
 	public void objTurnLeft(Event e, float elapsedTime)
 	{
         float keyValue = e.getValue(); 
@@ -433,6 +436,7 @@ public class GameObject
         this.setLocalRotation(rotAroundAvatarUp); 
 	}
 
+	/** turns game object to the right */
 	public void objTurnRight(Event e, float elapsedTime)
 	{
         float keyValue = e.getValue(); 
@@ -446,7 +450,36 @@ public class GameObject
         this.setLocalRotation(rotAroundAvatarUp);
 	}
 
-	public void objGPTurn(Event e, float elapsedTime)
+	/** pitches game object upwards */
+	public void objPitchUp(Event e, float elapsedTime)
+	{
+        float keyValue = e.getValue(); 
+        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
+
+		oldRotation = new Matrix4f(this.getWorldRotation()); 
+        oldUp = new Vector4f(-1f,0f,0f,1f).mul(oldRotation); 
+        rotAroundAvatarUp = new Matrix4f().rotation(elapsedTime, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z())); 
+        newRotation = oldRotation; 
+        rotAroundAvatarUp.mul(newRotation); 
+        this.setLocalRotation(rotAroundAvatarUp); 
+	}
+
+	/** pitches game object downwards */
+	public void objPitchDown(Event e, float elapsedTime)
+	{
+        float keyValue = e.getValue(); 
+        if (keyValue > -.2 && keyValue < .2) return;  // deadzone 
+
+		oldRotation = new Matrix4f(this.getWorldRotation()); 
+        oldUp = new Vector4f(1f,0f,0f,1f).mul(oldRotation); 
+        rotAroundAvatarUp = new Matrix4f().rotation(elapsedTime, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z())); 
+        newRotation = oldRotation; 
+        rotAroundAvatarUp.mul(newRotation); 
+        this.setLocalRotation(rotAroundAvatarUp); 
+	}
+
+	/** turns game object to the left or right depending on gamepad stick */
+	public void Yaw(Event e, float elapsedTime)
 	{
         float keyValue = e.getValue(); 
         if (keyValue > -.2 && keyValue < .2) return;  // deadzone 

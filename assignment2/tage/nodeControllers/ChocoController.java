@@ -2,46 +2,38 @@ package tage.nodeControllers;
 import tage.*;
 import org.joml.*;
 
+/**
+* A ChocoController is a node controller that, when enabled, causes any object
+* that it is attached to, to shrink. Mainly is a controller specifically made for
+* chocolate game objects that the dolphin collects for a speed boost upgrade.
+* @author Ethan N. Ha
+*/
 public class ChocoController extends NodeController
 {
-    private float scaleRate = .0003f;
-    private float cycleTime = 2000.0f;
-    private float totalTime = 0.0f;
+    private float scaleRate = .0005f;
     private float direction = 1.0f;
     private Matrix4f curScale, newScale;
-    private GameObject dol;
-    private Vector3f dolLoc;
-    private float locX, locY, locZ;
-	private Engine engine;
+    private Engine engine;
 
 	public ChocoController() { super(); }
 
-	public ChocoController(Engine e, GameObject dol, float ctime)
+    /** Constructor that creates the chocolate node controller */
+	public ChocoController(Engine e)
 	{	super();
-        cycleTime = ctime;
         engine = e;
         newScale = new Matrix4f();
-        locX = dol.getWorldLocation().x();
-        locY = dol.getWorldLocation().y();
-        locZ = dol.getWorldLocation().z();
-        dolLoc = new Vector3f(locX, locY, locZ);
 	}
 
+    /** This is called automatically by the RenderSystem (via SceneGraph) once per frame
+	*   during display().  It is for engine use and should not be called by the application.
+	*/
 	public void apply(GameObject choc)
 	{	
         float elapsedTime = super.getElapsedTime();
-        totalTime += elapsedTime/1000.0f;
-        if (totalTime > cycleTime)
-        { 
-            direction = -direction;
-            totalTime = 0.0f;
-        }
         curScale = choc.getLocalScale();
-        float scaleAmt = 1.0f + direction * scaleRate * elapsedTime;
-        newScale.scaling(curScale.m00()*scaleAmt, curScale.m11(), curScale.m22()*scaleAmt);
+        float scaleAmt = 1.0f + -direction * scaleRate * elapsedTime;
+        newScale.scaling(curScale.m00()*scaleAmt, curScale.m11()*scaleAmt, curScale.m22()*scaleAmt);
         choc.setLocalScale(newScale);
-        choc.setLocalLocation(dolLoc);
-        System.out.println("LOC" + dolLoc);
 
 	}
 }

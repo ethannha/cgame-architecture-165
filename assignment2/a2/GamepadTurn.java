@@ -21,9 +21,9 @@ public class GamepadTurn extends AbstractInputAction
         av = game.getAvatar();
         
         if(keyValue < -.4) 
-            av.objGPTurn(e, game.getElapsedTime());      //dolphin turn left
+            av.Yaw(e, game.getElapsedTime());      //dolphin turn left
         else if(keyValue > .4)
-            av.objGPTurn(e, -game.getElapsedTime());     //dolphin turn right
+            av.Yaw(e, -game.getElapsedTime());     //dolphin turn right
     }
 
 }

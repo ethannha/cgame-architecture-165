@@ -151,7 +151,7 @@ public class CameraOrbitController
     {
         public void performAction(float time, Event event)
         { 
-            if(cameraElevation + 0.2 > 0.0f)
+            if(cameraElevation + 0.2 < 80.0f)
                 cameraElevation += 0.2;
             cameraElevation = cameraElevation % 360;
             updateCameraPosition();
